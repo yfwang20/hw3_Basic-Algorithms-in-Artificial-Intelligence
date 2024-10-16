@@ -37,6 +37,7 @@ y_test = tensorflow.keras.utils.to_categorical(labels_B, 10)
 
 # 定义训练函数
 def train_model(hidden_layers):
+    # 构建模型
     model = tensorflow.keras.models.Sequential()
     model.add(tensorflow.keras.layers.Dense(100, activation='sigmoid', input_shape=(784,)))  # 输入层到第一个隐含层
     for _ in range(hidden_layers - 1):  # 添加剩余的隐含层
@@ -62,7 +63,6 @@ def train_model(hidden_layers):
         history = model.fit(X_train, y_train,
                             epochs=1,  # 每次只训练一个epoch
                             batch_size=20,  # 批量大小
-                             # 使用20%的数据作为验证集
                             verbose=0)  # 不打印进度条
 
         # 记录训练损失和准确率
