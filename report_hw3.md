@@ -68,6 +68,30 @@ $$
 
 利用`tensorflow`库建立神经网络，使用`Adam`优化器训练神经网络，损失函数为`categorical_crossentropy`分类交叉熵损失，分别设置隐含层的层数为1，3，5层，以Sigmoid函数作为激活函数。训练过程中，每次计算同时处理20个数据（`batch_size`）。共（对训练集数据）训练20次，记录针对训练集、测试集的损失函数、正确率随训练次数的变化关系。
 
+其中部分关键的代码如下，包括训练函数中对构建、编译模型并训练模型的部分
+
+```python
+def train_model(hidden_layers):
+  	# 构建模型
+    model = tensorflow.keras.models.Sequential()
+    model.add(tensorflow.keras.layers.Dense(100, activation='sigmoid', input_shape=(784,)))  # 输入层到第一个隐含层
+    for _ in range(hidden_layers - 1):  # 添加剩余的隐含层
+        model.add(tensorflow.keras.layers.Dense(100, activation='sigmoid'))
+    model.add(tensorflow.keras.layers.Dense(10, activation='softmax'))  # 输出层
+
+    # 编译模型
+    model.compile(optimizer='adam',  # 使用随机梯度下降作为优化器
+                  loss='categorical_crossentropy',  # 多分类交叉熵损失函数
+                  metrics=['accuracy'])
+    
+    # 训练模型
+    for epoch in range(20):  # 可以根据需要调整epoch数量
+        history = model.fit(X_train, y_train,
+                            epochs=1,  # 每次只训练一个epoch
+                            batch_size=20,  # 批量大小
+                            verbose=0)  # 不打印进度条
+```
+
 损失函数关于训练次数的关系为
 
 <img src="/Users/wangyifeng/Desktop/学习/人工智能基础算法/hw/hw3/homework3/task2_training_test_loss.png" alt="task2_training_test_loss" style="zoom:50%;" />
@@ -154,6 +178,31 @@ $$
 ## 5
 
 构建带有单个残差块的神经网络，包含两个全连接层，其中第一个全连接层的激活函数为ReLU，第二个不应用任何激活函数，隐含层数为1，包含100个节点，重复上述过程。
+
+其中部分关键的代码如下，包括定义残差块、定义神经网络模型的部分
+
+```python
+# 定义残差块
+class ResidualBlock(tensorflow.keras.layers.Layer):
+    def __init__(self, units=100):
+        super(ResidualBlock, self).__init__()
+        self.dense1 = tensorflow.keras.layers.Dense(units, activation='relu')
+        self.dense2 = tensorflow.keras.layers.Dense(units, activation=None)
+
+    def call(self, inputs):
+        x = self.dense1(inputs)
+        x = self.dense2(x)
+        return tensorflow.nn.relu(x + inputs)
+
+# 定义神经网络模型
+def create_model(input_shape=(784,)):
+    model = tensorflow.keras.models.Sequential([
+        tensorflow.keras.layers.Input(shape=input_shape),
+        ResidualBlock(784),  # 使用784个节点以保持维度一致
+        tensorflow.keras.layers.Dense(10, activation='softmax')  # 输出层
+    ])
+    return model
+```
 
 损失函数关于训练次数的关系为
 
